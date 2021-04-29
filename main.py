@@ -75,27 +75,38 @@ def google_assistant(data):
 def run_bubble():
     global bubble_state, engine
     order = take_command()
-    keyword = order.replace("translate", "")
-    while keyword == "":
-        talk("Go ahead!")
-        keyword = take_command()
+
     if "translate" in order:
-        talk("To which language?")
-        lang = take_command()
-        while lang == "":
-            talk("Can you repeat that?")
-            lang = take_command()
-        for code, language in LANGUAGES.items():
-            if language == lang:
-                dest_lang = code
         keyword = order.replace("translate", "")
-        translation = Translator().translate(keyword, dest=dest_lang)
-        talk("Translating "+ keyword + " to " +lang)
-        speak = gTTS(text=translation.text, lang=dest_lang, slow=False)
-        speak.save("captured_voice.mp3")
-        playsound.playsound("captured_voice.mp3")
-        os.remove("captured_voice.mp3")
-        print(translation.text)
+        while keyword == "":
+            talk("Go ahead!")
+            keyword = take_command()
+        talk("To which language?")
+        lang_available = False
+        dest_lang = ""
+
+        while lang_available is False:
+            lang = take_command()
+            if lang == '':
+                talk("Please tell the language for translation")
+            else:
+                for code, language in LANGUAGES.items():
+                    if language == lang:
+                        dest_lang = code
+                        lang_available = True
+                if dest_lang == "":
+                    talk("Language not found. Choose a different language.")
+        try:
+            translation = Translator().translate(keyword, dest=dest_lang)
+            talk("Translating "+ keyword + " to " +lang)
+            speak = gTTS(text=translation.text, lang=dest_lang, slow=False)
+            speak.save("captured_voice.mp3")
+            playsound.playsound("captured_voice.mp3")
+            os.remove("captured_voice.mp3")
+            print(translation.text)
+        except Exception as e:
+            talk("Sorry! There was an error!")
+            print(e)
     elif 'play' in order:
         song = order.replace('play', '')
         print("Playing...")
